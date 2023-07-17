@@ -168,13 +168,13 @@ class _RegisterPageState extends State<RegisterPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
-                    const Text('Belum punya akun? '),
+                    const Text('Sudah punya akun? '),
                     GestureDetector(
                       onTap: () {
                         toLogin();
                       },
                       child: const Text(
-                        'Register disini.',
+                        'Login disini.',
                         style: TextStyle(color: Colors.deepPurple),
                       ),
                     )

@@ -37,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void simpleLogin() {
     if (email == 'admin' && password == 'admin') {
-      Navigator.pushNamed(context, '/menu');
+      Navigator.pushNamed(context, '/homepage');
     } else {
       Fluttertoast.showToast(
           msg: 'Username atau Password salah!',

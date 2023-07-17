@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:new_todo_app/pages/home_base_page.dart';
 import 'package:new_todo_app/pages/login_page.dart';
 import 'package:new_todo_app/pages/register_page.dart';
 
@@ -8,7 +9,8 @@ void main() {
     onGenerateRoute: ((RouteSettings settings) {
       var routes = <String, WidgetBuilder>{
         '/': (context) => const LoginPage(),
-        '/register': (context) => const RegisterPage()
+        '/register': (context) => const RegisterPage(),
+        '/homepage': (context) => const HomeBasePage()
       };
 
       WidgetBuilder? builder = routes[settings.name];
