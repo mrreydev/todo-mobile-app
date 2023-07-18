@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:new_todo_app/pages/profile_page.dart';
 import 'package:new_todo_app/pages/todo/todo_home_page.dart';
 import 'package:new_todo_app/pages/todo/todo_important_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,10 +22,7 @@ class _HomeBasePageState extends State<HomeBasePage> {
   static const List<Widget> _widgetOptions = <Widget>[
     TodoHomePage(),
     TodoImportantPage(),
-    Text(
-      'Index 2: School',
-      style: optionStyle,
-    ),
+    ProfilePage(),
   ];
 
   void _onItemTapped(int index) {

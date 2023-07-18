@@ -33,7 +33,7 @@ class _CardTodoState extends State<CardTodo> {
                           children: [
                             Expanded(
                               child: Text(
-                                'Todo title man wings zero ew verka oawkoawk',
+                                'Todo title test',
                                 style: TextStyle(
                                     color: Colors.black87,
                                     fontSize: 18,
