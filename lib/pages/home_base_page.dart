@@ -31,6 +31,10 @@ class _HomeBasePageState extends State<HomeBasePage> {
     });
   }
 
+  void toAddTodoPage() {
+    Navigator.pushNamed((context), '/add-todo');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,7 +65,9 @@ class _HomeBasePageState extends State<HomeBasePage> {
       floatingActionButton: _selectedIndex == 2
           ? null
           : FloatingActionButton(
-              onPressed: () {},
+              onPressed: () {
+                toAddTodoPage();
+              },
               tooltip: 'Increment',
               backgroundColor: Colors.deepPurple[400],
               child: const Icon(Icons.add),
