@@ -45,15 +45,18 @@ class UserViewModel {
       "phone": phone,
       "email": email,
       "password": password,
-      "confirmPassword": confirmPassword,
+      "password_confirmation": confirmPassword,
       "role": "general"
     };
 
     try {
       String? url = dotenv.env['BASE_URL'];
       http.Response resp = await http.post(Uri.parse(url! + '/auth/register'),
-          headers: {"Accept": "application/json"}, body: json.encode(data));
-
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          body: json.encode(data));
       if (resp.statusCode == 201) {
         final parsedJson = jsonDecode(resp.body);
         final data = parsedJson['message'];
