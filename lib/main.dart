@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:new_todo_app/pages/home_base_page.dart';
 import 'package:new_todo_app/pages/login_page.dart';
 import 'package:new_todo_app/pages/register_page.dart';
 import 'package:new_todo_app/pages/todo/add_todo_page.dart';
 
-void main() {
+void main() async {
+  await dotenv.load(fileName: "assets/.env");
   runApp(MaterialApp(
     initialRoute: '/',
     onGenerateRoute: ((RouteSettings settings) {

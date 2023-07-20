@@ -3,7 +3,13 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:new_todo_app/model/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:new_todo_app/view_model/user_view_model.dart';
+import 'package:new_todo_app/model/user_token_model.dart';
+
+import 'package:new_todo_app/helper.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,7 +21,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   String email = "";
   String password = "";
-  bool? rememberMe = false;
 
   void _changeEmail(value) {
     this.setState(() {
@@ -29,25 +34,135 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  void _changeRememberMe(value) {
-    this.setState(() {
-      rememberMe = value;
-    });
+  showLoaderDialog(BuildContext context, int period) {
+    AlertDialog alert = AlertDialog(
+      content: Row(
+        children: [
+          const CircularProgressIndicator(),
+          Container(
+            margin: const EdgeInsets.only(left: 7),
+            child: const Text("Loading..."),
+          )
+        ],
+      ),
+    );
+
+    late Timer _timer;
+
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          _timer = Timer(Duration(seconds: period), () {
+            Navigator.of(context).pop();
+          });
+
+          return alert;
+        }).then(
+      (value) {
+        if (_timer.isActive) {
+          _timer.cancel();
+        }
+      },
+    );
   }
 
-  void simpleLogin() {
-    if (email == 'admin' && password == 'admin') {
-      Navigator.pushNamed(context, '/homepage');
-    } else {
+  void loginToSystem() async {
+    if ((email == "") || (password == "")) {
       Fluttertoast.showToast(
-          msg: 'Username atau Password salah!',
-          toastLength: Toast.LENGTH_SHORT);
+          msg: "Email dan password tidak boleh kosong",
+          toastLength: Toast.LENGTH_SHORT,
+          backgroundColor: Colors.red[800],
+          textColor: Colors.white);
+
+      return;
     }
+
+    showLoaderDialog(context, 30);
+    var respToken = null;
+
+    try {
+      respToken = await UserViewModel().login(email, password);
+    } catch (error) {
+      print("error login $error");
+      return;
+    }
+
+    if (respToken == null) {
+      Fluttertoast.showToast(
+          msg: "Email atau password salah, mohon periksa kembali.",
+          toastLength: Toast.LENGTH_SHORT,
+          backgroundColor: Colors.red[800],
+          textColor: Colors.white);
+
+      return;
+    }
+
+    saveToken(respToken);
+
+    var respUser = null;
+
+    try {
+      respUser = await UserViewModel().loggedInUser();
+    } catch (error) {
+      print("error getLoggedIn $error");
+    }
+
+    if (respUser == null) {
+      Fluttertoast.showToast(
+          msg: "Login gagal, harap coba kembali.",
+          toastLength: Toast.LENGTH_SHORT,
+          backgroundColor: Colors.red[800],
+          textColor: Colors.white);
+
+      return;
+    }
+
+    saveUser(respUser);
+
+    Navigator.pushNamed((context), '/homepage');
+  }
+
+  void saveToken(String token) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    if (pref.containsKey('token')) {
+      pref.clear();
+    }
+    pref.setString('token', token);
+  }
+
+  void saveUser(UserModel user) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    if (pref.containsKey('userInfo')) {
+      pref.clear();
+    }
+    pref.setString('userInfo', jsonEncode(user.toJson()));
   }
 
   void toRegister() {
-    // Navigator.of(context).pop();
     Navigator.pushNamed(context, '/register');
+  }
+
+  checkLoggedIn() async {
+    var token = Helper().getToken();
+
+    if (token != null) {
+      try {
+        final respUser = await UserViewModel().loggedInUser();
+
+        if (respUser != null) {
+          Navigator.of(context).pop();
+          Navigator.pushNamed((context), '/homepage');
+        }
+      } catch (error) {
+        print("error $error");
+      }
+    }
+  }
+
+  void initState() {
+    super.initState();
+    checkLoggedIn();
   }
 
   @override
@@ -120,18 +235,6 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
                   ),
-                  CheckboxListTile(
-                    controlAffinity: ListTileControlAffinity.leading,
-                    title: const Text('Remember me'),
-                    activeColor: Colors.deepPurple[600],
-                    contentPadding: EdgeInsets.symmetric(horizontal: 6),
-                    value: rememberMe,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        rememberMe = value;
-                      });
-                    },
-                  ),
                   Padding(
                     padding: EdgeInsets.all(16),
                     child: ElevatedButton(
@@ -141,8 +244,7 @@ class _LoginPageState extends State<LoginPage> {
                           minimumSize: const Size.fromHeight(50),
                         ),
                         onPressed: () {
-                          // loginToSystem();
-                          simpleLogin();
+                          loginToSystem();
                         },
                         child: const Text('Login')),
                   ),
