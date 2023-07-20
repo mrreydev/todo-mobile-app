@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:new_todo_app/model/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import 'package:new_todo_app/view_model/user_view_model.dart';
 import 'package:new_todo_app/model/user_token_model.dart';
@@ -84,11 +85,13 @@ class _LoginPageState extends State<LoginPage> {
     try {
       respToken = await UserViewModel().login(email, password);
     } catch (error) {
+      Navigator.pop(context);
       print("error login $error");
       return;
     }
 
     if (respToken == null) {
+      Navigator.pop(context);
       Fluttertoast.showToast(
           msg: "Email atau password salah, mohon periksa kembali.",
           toastLength: Toast.LENGTH_SHORT,
@@ -105,10 +108,12 @@ class _LoginPageState extends State<LoginPage> {
     try {
       respUser = await UserViewModel().loggedInUser();
     } catch (error) {
+      Navigator.pop(context);
       print("error getLoggedIn $error");
     }
 
     if (respUser == null) {
+      Navigator.pop(context);
       Fluttertoast.showToast(
           msg: "Login gagal, harap coba kembali.",
           toastLength: Toast.LENGTH_SHORT,
@@ -118,6 +123,8 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
+    Navigator.pop(context);
+
     saveUser(respUser);
 
     Navigator.pushNamed((context), '/homepage');
@@ -126,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
   void saveToken(String token) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     if (pref.containsKey('token')) {
-      pref.clear();
+      pref.remove('token');
     }
     pref.setString('token', token);
   }
@@ -134,8 +141,9 @@ class _LoginPageState extends State<LoginPage> {
   void saveUser(UserModel user) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     if (pref.containsKey('userInfo')) {
-      pref.clear();
+      pref.remove('userInfo');
     }
+
     pref.setString('userInfo', jsonEncode(user.toJson()));
   }
 
@@ -158,10 +166,15 @@ class _LoginPageState extends State<LoginPage> {
         print("error $error");
       }
     }
+
+    FlutterNativeSplash.remove();
   }
 
   void initState() {
     super.initState();
+    WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+    FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
     checkLoggedIn();
   }
 
