@@ -84,6 +84,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       respToken = await UserViewModel().login(email, password);
+      print(respToken);
     } catch (error) {
       Navigator.pop(context);
       print("error login $error");
