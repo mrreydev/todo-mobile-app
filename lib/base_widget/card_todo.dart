@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:new_todo_app/model/todo_model.dart';
 
 class CardTodo extends StatefulWidget {
-  const CardTodo({super.key});
+  // const CardTodo({super.key});
+  CardTodo(this.index, this.data);
+
+  final int index;
+  TodoModel data;
 
   @override
-  State<CardTodo> createState() => _CardTodoState();
+  State<CardTodo> createState() => _CardTodoState(index, data);
 }
 
 class _CardTodoState extends State<CardTodo> {
+  final int index;
+  TodoModel data;
+
+  _CardTodoState(this.index, this.data);
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -33,7 +41,7 @@ class _CardTodoState extends State<CardTodo> {
                           children: [
                             Expanded(
                               child: Text(
-                                'Todo title test',
+                                data.name,
                                 style: TextStyle(
                                     color: Colors.black87,
                                     fontSize: 18,
@@ -43,18 +51,20 @@ class _CardTodoState extends State<CardTodo> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            Icon(
-                              Icons.star,
-                              color: Colors.yellow[700],
-                            )
+                            data.important
+                                ? Icon(
+                                    Icons.star,
+                                    color: Colors.yellow[700],
+                                  )
+                                : Text('')
                           ],
                         ),
                       ),
                       Row(
-                        children: const <Widget>[
+                        children: <Widget>[
                           Expanded(
                             child: Text(
-                              'Lorem ipsum dolor sit amet consectetur. Ultrices sed faucibus egestas non posuere ornare sed nam. Sem mauris nunc et quis ut at.',
+                              data.description,
                               style: TextStyle(
                                 color: Colors.black54,
                                 fontSize: 14,

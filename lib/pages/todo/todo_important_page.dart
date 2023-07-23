@@ -44,7 +44,7 @@ class _TodoImportantPageState extends State<TodoImportantPage> {
               padding: const EdgeInsets.fromLTRB(14.0, 0, 14.0, 0),
               child: Column(
                 children: <Widget>[
-                  for (int x = 1; x <= 3; x++) ...[CardTodo()],
+                  // for (int x = 1; x <= 3; x++) ...[CardTodo()],
                 ],
               ),
             )),
