@@ -10,7 +10,7 @@ class TodoViewModel {
   /**
    * Get Todo List
    */
-  Future getTodos(int page, [String? search]) async {
+  Future getTodos(int page, [String? search, bool? important]) async {
     final token = await Helper().getToken();
 
     if (token == null) {
@@ -22,8 +22,14 @@ class TodoViewModel {
       final params = {'page': page, 'search': search ?? ''};
 
       String? baseUrl = dotenv.env['BASE_URL'];
-      var url = Uri.parse(
-          baseUrl! + '/todos?page=' + page.toString() + '&search=$search');
+      String combineUrl =
+          baseUrl! + '/todos?page=' + page.toString() + '&search=$search';
+
+      if (important != null) {
+        combineUrl += '&important=$important';
+      }
+
+      var url = Uri.parse(combineUrl);
 
       print(url);
       http.Response resp = await http.get(url, headers: {
