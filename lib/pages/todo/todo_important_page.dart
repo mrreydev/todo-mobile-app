@@ -2,10 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:loadmore/loadmore.dart';
 import 'package:new_todo_app/base_widget/card_todo.dart';
 
 import 'package:new_todo_app/model/todo_model.dart';
+
+import 'package:new_todo_app/model/todo_task_model.dart';
 import 'package:new_todo_app/view_model/todo_view_model.dart';
 
 class TodoImportantPage extends StatefulWidget {
@@ -23,6 +26,8 @@ class _TodoImportantPageState extends State<TodoImportantPage> {
   int page = 1, totalPage = 1;
   List todos = [];
   Timer? _debounce;
+
+  late TodoTaskModel? detailTodo;
 
   void _changeInputSearch(value) {
     setState(() {
@@ -75,8 +80,169 @@ class _TodoImportantPageState extends State<TodoImportantPage> {
     handleResetList();
   }
 
-  String language() {
-    return "";
+  showLoaderDialog(BuildContext context, int period) {
+    AlertDialog alert = AlertDialog(
+      content: Row(
+        children: [
+          const CircularProgressIndicator(),
+          Container(
+            margin: const EdgeInsets.only(left: 7),
+            child: const Text("Loading..."),
+          )
+        ],
+      ),
+    );
+
+    late Timer _timer;
+
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          _timer = Timer(Duration(seconds: period), () {
+            Navigator.of(context).pop();
+          });
+
+          return alert;
+        }).then(
+      (value) {
+        if (_timer.isActive) {
+          _timer.cancel();
+        }
+      },
+    );
+  }
+
+  void handleGetTodo(TodoModel data) async {
+    showLoaderDialog(context, 5);
+    try {
+      final resp = await TodoViewModel().getTodo(data.id.toString());
+
+      if (resp != null) {
+        setState(() {
+          detailTodo = todoTaskModelFromJson(jsonEncode(resp));
+        });
+
+        print(detailTodo?.name);
+        Navigator.of(context, rootNavigator: true).pop();
+
+        showDetailDialog(detailTodo!);
+      } else {
+        Navigator.of(context, rootNavigator: true).pop();
+        Fluttertoast.showToast(
+            msg: "Gagal mendapatkan data todo",
+            toastLength: Toast.LENGTH_SHORT,
+            backgroundColor: Colors.red[800],
+            textColor: Colors.white);
+      }
+    } catch (e) {
+      Navigator.of(context, rootNavigator: true).pop();
+      Fluttertoast.showToast(
+          msg: "Gagal mendapatkan data todo",
+          toastLength: Toast.LENGTH_SHORT,
+          backgroundColor: Colors.red[800],
+          textColor: Colors.white);
+    }
+  }
+
+  void handleDeleteTodo(String id) async {
+    try {
+      showLoaderDialog(context, 30);
+      final resp = await TodoViewModel().deleteTodo(id);
+
+      if (resp != null) {
+        Navigator.of(context, rootNavigator: true).pop();
+        handleResetList();
+        Fluttertoast.showToast(
+            msg: "Berhasil Menghapus Todo",
+            toastLength: Toast.LENGTH_LONG,
+            backgroundColor: Colors.green[800],
+            textColor: Colors.white);
+      } else {
+        Navigator.of(context, rootNavigator: true).pop();
+        Fluttertoast.showToast(
+            msg: "Gagal menghapus todo",
+            toastLength: Toast.LENGTH_SHORT,
+            backgroundColor: Colors.red[800],
+            textColor: Colors.white);
+      }
+    } catch (e) {
+      print(e);
+      Navigator.of(context, rootNavigator: true).pop();
+      Fluttertoast.showToast(
+          msg: "Gagal menghapus todo",
+          toastLength: Toast.LENGTH_SHORT,
+          backgroundColor: Colors.red[800],
+          textColor: Colors.white);
+    }
+  }
+
+  showDetailDialog(TodoTaskModel data) {
+    showDialog(
+        context: context,
+        builder: ((context) {
+          return SimpleDialog(
+            title: const Text('Hapus Todo?'),
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24.0, 0, 24.0, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            data.name,
+                            style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold),
+                            softWrap: false,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        data.important
+                            ? Icon(
+                                Icons.star,
+                                color: Colors.yellow[700],
+                              )
+                            : Text('')
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 8.0,
+                    ),
+                    Text(
+                      "${data.description}",
+                      style: TextStyle(color: Colors.black87, fontSize: 16),
+                    ),
+                    const SizedBox(
+                      height: 16.0,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: <Widget>[
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              onPrimary: Colors.white,
+                              primary: Colors.deepPurple,
+                            ),
+                            onPressed: () {
+                              Navigator.of(context, rootNavigator: true).pop();
+                              handleDeleteTodo(data.id.toString());
+                            },
+                            child: const Text('Hapus')),
+                      ],
+                    )
+                  ],
+                ),
+              )
+            ],
+          );
+        }));
   }
 
   @override
@@ -128,9 +294,18 @@ class _TodoImportantPageState extends State<TodoImportantPage> {
                 textBuilder: DefaultLoadMoreTextBuilder.english,
                 child: ListView.builder(
                   itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                        padding: EdgeInsets.fromLTRB(14.0, 0, 14.0, 0),
-                        child: CardTodo(index, todos[index]));
+                    return GestureDetector(
+                      onLongPress: () {
+                        print('onLongPress');
+                        handleGetTodo(todos[index]);
+                      },
+                      onTap: () {
+                        print('onTap');
+                      },
+                      child: Padding(
+                          padding: EdgeInsets.fromLTRB(14.0, 0, 14.0, 0),
+                          child: CardTodo(index, todos[index])),
+                    );
                   },
                   itemCount: todos.length,
                 ),

@@ -16,7 +16,6 @@ class TodoViewModel {
     if (token == null) {
       return null;
     }
-    print(page);
 
     try {
       final params = {'page': page, 'search': search ?? ''};
@@ -31,7 +30,6 @@ class TodoViewModel {
 
       var url = Uri.parse(combineUrl);
 
-      print(url);
       http.Response resp = await http.get(url, headers: {
         "Accept": "application/json",
         "Content-Type": "application/json",
@@ -48,6 +46,75 @@ class TodoViewModel {
       }
     } catch (e) {
       print("get todos: $e");
+      return null;
+    }
+  }
+
+  /**
+   * Get Todo
+   */
+  Future getTodo(String id) async {
+    final token = await Helper().getToken();
+
+    if (token == null) {
+      return null;
+    }
+
+    try {
+      String? baseUrl = dotenv.env['BASE_URL'];
+      String combineUrl = baseUrl! + '/todos/$id';
+
+      var url = Uri.parse(combineUrl);
+
+      http.Response resp = await http.get(url, headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token,
+      });
+
+      if (resp.statusCode == 200) {
+        final parsedJson = jsonDecode(resp.body);
+        final data = parsedJson['data'];
+
+        return data;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print("get todo: $e");
+      return null;
+    }
+  }
+
+  /**
+   * Delete Todo
+   */
+  Future deleteTodo(String id) async {
+    final token = await Helper().getToken();
+
+    if (token == null) {
+      return null;
+    }
+
+    try {
+      String? baseUrl = dotenv.env['BASE_URL'];
+      String combineUrl = baseUrl! + '/todos/$id';
+
+      var url = Uri.parse(combineUrl);
+
+      http.Response resp = await http.delete(url, headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token,
+      });
+
+      if (resp.statusCode == 200) {
+        return true;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print("delete todo: $e");
       return null;
     }
   }
