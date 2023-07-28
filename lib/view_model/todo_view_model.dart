@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:new_todo_app/model/task_model.dart';
 import 'package:new_todo_app/model/user_model.dart';
 import 'package:new_todo_app/helper.dart';
 
@@ -109,6 +110,56 @@ class TodoViewModel {
       });
 
       if (resp.statusCode == 200) {
+        return true;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print("delete todo: $e");
+      return null;
+    }
+  }
+
+  /**
+   * Create Todo
+   */
+
+  Future createTodo(String name, String description, String dueDate,
+      bool remindMe, bool important, List tasks) async {
+    Map data = {
+      "name": name,
+      "description": description,
+      "due_date": dueDate,
+      "remind_me": remindMe,
+      "important": important,
+      "tasks": tasks.map((task) {
+        return {"task": task.task, "finished": task.finished};
+      }).toList()
+    };
+
+    print(data);
+
+    final token = await Helper().getToken();
+
+    if (token == null) {
+      return null;
+    }
+
+    try {
+      String? baseUrl = dotenv.env['BASE_URL'];
+      String combineUrl = baseUrl! + '/todos';
+
+      var url = Uri.parse(combineUrl);
+
+      http.Response resp = await http.post(url,
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token,
+          },
+          body: jsonEncode(data));
+
+      if (resp.statusCode == 201) {
         return true;
       } else {
         return null;
