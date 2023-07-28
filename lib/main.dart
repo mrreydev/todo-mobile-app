@@ -4,6 +4,7 @@ import 'package:new_todo_app/pages/home_base_page.dart';
 import 'package:new_todo_app/pages/login_page.dart';
 import 'package:new_todo_app/pages/register_page.dart';
 import 'package:new_todo_app/pages/todo/add_todo_page.dart';
+import 'package:new_todo_app/pages/todo/edit_todo_page.dart';
 
 void main() async {
   await dotenv.load(fileName: "assets/.env");
@@ -14,7 +15,8 @@ void main() async {
         '/': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/homepage': (context) => const HomeBasePage(),
-        '/add-todo': (context) => const AddTodoPage()
+        '/add-todo': (context) => const AddTodoPage(),
+        '/edit-todo': (context) => EditTodoPage(settings.arguments)
       };
 
       WidgetBuilder? builder = routes[settings.name];

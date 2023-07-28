@@ -251,6 +251,14 @@ class _TodoImportantPageState extends State<TodoImportantPage> {
     super.dispose();
   }
 
+  void toEditTodo(TodoModel data) async {
+    Navigator.pushNamed(
+      context,
+      '/edit-todo',
+      arguments: {'todoId': data.id},
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -296,11 +304,10 @@ class _TodoImportantPageState extends State<TodoImportantPage> {
                   itemBuilder: (BuildContext context, int index) {
                     return GestureDetector(
                       onLongPress: () {
-                        print('onLongPress');
                         handleGetTodo(todos[index]);
                       },
                       onTap: () {
-                        print('onTap');
+                        toEditTodo(todos[index]);
                       },
                       child: Padding(
                           padding: EdgeInsets.fromLTRB(14.0, 0, 14.0, 0),

@@ -169,4 +169,51 @@ class TodoViewModel {
       return null;
     }
   }
+
+  /**
+   * Update Todo
+   */
+  Future updateTodo(String id, String name, String description, String dueDate,
+      bool remindMe, bool important, List tasks) async {
+    Map data = {
+      "name": name,
+      "description": description,
+      "due_date": dueDate,
+      "remind_me": remindMe,
+      "important": important,
+      "tasks": tasks.map((task) {
+        return {"id": task.id, "task": task.task, "finished": task.finished};
+      }).toList()
+    };
+
+    final token = await Helper().getToken();
+
+    if (token == null) {
+      return null;
+    }
+
+    try {
+      String? baseUrl = dotenv.env['BASE_URL'];
+      String combineUrl = baseUrl! + '/todos/${id}}';
+
+      var url = Uri.parse(combineUrl);
+
+      http.Response resp = await http.put(url,
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token,
+          },
+          body: jsonEncode(data));
+
+      if (resp.statusCode == 200) {
+        return true;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print("update todo: $e");
+      return null;
+    }
+  }
 }

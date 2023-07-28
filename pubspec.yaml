@@ -41,6 +41,7 @@ dependencies:
   http: ^0.13.6
   flutter_native_splash: ^2.2.19
   loadmore: ^2.1.0
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:
